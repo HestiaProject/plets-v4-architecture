@@ -1,0 +1,35 @@
+\chapter{Compilation Directives}
+\label{ch:staticfinal}
+
+Compilation directives are well-known in C++, often identified as "\#ifdef". While C\# made a similar mechanism available to us (\#if), Java is lacking in an in-built preprocessor, and therefore has no mechanism with the exact same purpose as the C++ compilation directives. This chapter presents a short introduction to compilers and the concept of compilation directives and preprocessors, as well as the reasons why these are used in PLeTs and how to use Static Final variables in Java to reach a similar result.
+
+%----------------------------------------------------------
+
+\section{Compilers}
+
+Most are unaware of the exact way through which compilers work, but a basic understanding of their mechanisms is necessary to fully comprehend the uses of compilation directives. Compilers can generally be divided in three or four smaller tools that, together, execute the entire compilation process. These are the Lexical Analyser, the Syntactic Analyser, the Semantic Analyser, and, optionally, the Code Generator. Other features can be included in compilers, such as code optimizers, but these are not covered here.
+
+%----------------------------------------------------------
+
+\subsection{Lexical Analyser}
+
+The Lexical Analyser is the part of a compiler that is responsible for tokenizing the input text. What this means is that the text, generally code, that is sent as input to the compiler is fully read and divided into its basic units, such as "identifiers", "reserved words", etc. This is important for the compilation process as the following steps (Syntactic and Semantic analysis) are not entirely concerned with the exact text included in the input, but rather with its structure. This tokenization process is generally executed in a single pass, and outputs an ordered list of tokens.
+
+We can use the typical "Hello World" Java program as an example of Lexical Analysis, based on the code presented in Listing \ref{lst:helloworldlex}, taken from \cite{SEDGEWICK:2011}.
+
+\begin{listing}
+\begin{minted}[frame=single,
+               framesep=3mm,
+               linenos=true,
+               xleftmargin=21pt,
+               breaklines=true,
+               tabsize=4]{java}
+public class HelloWorld {
+  public static void main(String[] args) {
+      // Prints "Hello, World" to the terminal window.
+      System.out.println("Hello, World");
+     }
+}
+\end{minted}
+\caption{HelloWorld.java from \cite{SEDGEWICK:2011}} \label{lst:helloworldlex}
+\end{listing}
