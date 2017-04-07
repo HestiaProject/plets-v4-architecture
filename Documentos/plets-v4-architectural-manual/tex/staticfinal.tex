@@ -1,6 +1,10 @@
 \chapter{Compilation Directives}
 \label{ch:staticfinal}
 
+In order to control variability, it is important to have mechanisms in place to manage that variability in terms of configuration (both in terms of products and in terms of modules), traceability (identifying portions of code and linking them to models), solution building (again, both in terms of products and in terms of modules), access security (management of code-access permissions), non-functional properties (managing variability in quality terms such as performance and reliability) and several other concerns that exist in the fields of Software Engineering that deal with variability, such as \acrfull{cbse} and \acrfull{sple}.
+
+Though variability mechanisms can be considered to have a ``\gls{bindtime}'' (such as compile, link, run, load, etc.), this chapter considers only the variability mechanisms for Compile-Time variation. This focus is due to our current focus being on \emph{static} \acrshort{spl}, which are SPL where variation is handled during the configuration of a product, rather than while the product is running.
+
 Compilation directives are well-known in C++, often identified as ``\#ifdef''. While C\# made a similar mechanism available to us (\#if), Java is lacking in an in-built preprocessor, and therefore has no mechanism with the exact same purpose as the C++ compilation directives. This chapter presents a short introduction to compilers and the concept of compilation directives and preprocessors, as well as the reasons why these are used in PLeTs and how to use Static Final variables in Java to reach a similar result.
 
 %----------------------------------------------------------

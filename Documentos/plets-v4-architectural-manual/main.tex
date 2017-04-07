@@ -4,10 +4,27 @@
 \usepackage{listings}
 \usepackage{minted}
 \usepackage{syntax}
+\usepackage{glossaries}
 
 \title{PLeTs v4 Architectural Manual}
 \author{Marcelo Schmitt Laser}
 \date{April 2017}
+
+%-----------------------------------------------
+
+\makeglossaries
+
+\newacronym{corba}{CORBA}{Common Object Request Broker Architecture}
+\newacronym{cbse}{CBSE}{Component-Based Software Engineering}
+\newacronym{spl}{SPL}{Software Product Line}
+\newacronym{sple}{SPLE}{Software Product Line Engineering}
+\newglossaryentry{bindtime}
+{
+	name={binding time},
+	description={The moment during which the properties of a software artifact are configured. Typically, these may be: compile-time, where the configuration is handled during the compilation process; link-time, where the configuration is handled at the moment of dependency solution and access to external libraries; load-time, where the configuration is handled the moment the software product is instanced (loaded), and; run-time, where the configuration is handled during the software's execution.}
+}
+
+%-----------------------------------------------
 
 \begin{document}
 
@@ -29,6 +46,8 @@
 \end{titlepage}
 
 \include{tex/introduction}
+
+\printglossary
 
 \tableofcontents
 
