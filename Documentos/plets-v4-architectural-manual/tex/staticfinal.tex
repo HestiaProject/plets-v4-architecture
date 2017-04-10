@@ -208,15 +208,18 @@ The Java Preprocessor study is therefore dedicated to finding a way to define co
 \section{Compilation Directives in Java}
 \label{sc:compjava}
 
-In order to implement a system that has \gls{variability}, mechanisms must be set in place in the code to control it, trace it and maintain it. The number of proposed \gls{variability} control mechanisms is quite possibly uncountable, with new ones being proposed every year to handle novel situations in \acrshort{sple}, \acrshort{cbse} and other software engineering fields that rely on \gls{variability}. In this section, we will explore \gls{variability} control mechanisms specific to the Java programming language.
+In order to implement a system that has \gls{variability}, mechanisms must be set in place in the code to control it, trace it and maintain it. The number of proposed \gls{variability} control mechanisms is quite possibly uncountable, with new ones being proposed every year to handle novel situations in \acrshort{sple}, \acrshort{cbse} and other software engineering fields that rely on \gls{variability}. In this section, we will explore \gls{variability} control mechanisms specific to the Java programming language. All of the mechanisms presented in this section have merit, and each is suited for different kinds of \gls{variability} management. Therefore, a good understanding of all mechanisms and when to apply them is important.
+
+Section \ref{sc:sfa} presents a ``quick-fix'' form of \gls{variability} management in Java, relying on the built-in code optimizers of Java compilers to force \gls{variability} into the source code. Section \ref{sc:annotations} explores the possibility of using Java annotations and code reflection to implement \gls{variability} points. Section \ref{sc:interfaces} re-evaluates the primary mechanism of PLeTs v1, interfaces, as well as presenting a new form of using them for selecting \gls{variant}s. Finally, Section \ref{sc:prepros} presents the proposal of a Java preprocessor to include first-class compilation directives into the language.
 
 %----------------------------------------------------------
 
 \subsection{Static Final Attributes}
+\label{sc:sfa}
 
-One way to get around the problem of Java not having a preprocessor is by abusing the optimization features that Java does have. In the standard Java compilers, any code that is unreachable is automatically removed by the compiler's optimizer, which means that we are able to remove certain parts of code by making sure they can never be executed.
+One way to get around the problem of Java not having a preprocessor is by abusing the optimization features that Java compilers do generally have. In the standard Java compilers, any code that is unreachable is automatically removed by the compiler's optimizer, which means that we are able to remove certain parts of code by making sure they can never be executed. Essentially, we create conditions of the form \lstinline{if(true)} and \lstinline{if(false)} to encapsulate our \gls{variant} code.
 
-To do this, one can use what is called a Static Final attribute. When a conditional loop evaluates itself with a single boolean attribute, and that attribute is always false, that loop will be removed by the optimizer due to being unreachable. Usually the compiler cannot know if the condition will be false or not, but since a Static Final attribute can never change its value, the optimizer will be able to tell. Listings \ref{lst:preprocessor} and \ref{lst:staticfinal} show an example of how this can be used.
+To do this, one can use what is called a \lstinline{Static Final} attribute. When a conditional loop evaluates itself with a single boolean attribute, and that attribute is always false, that loop will be removed by the optimizer due to being unreachable. Usually the compiler cannot know if the condition will always be false or not, given that this would require a complex analysis of a state machine, but since a \lstinline{Static Final} attribute can never change its value, the optimizer will be able to tell. Listings \ref{lst:preprocessor} and \ref{lst:staticfinal} show an example of how this can be used.
 
 \begin{listing}
 \begin{minted}[frame=single,
@@ -265,9 +268,9 @@ public class UmlAssociation extends UmlElement implements Serializable
 \caption{Variability point being resolved by the Preprocessor.java attributes, taken from \cite{AUTOREST}} \label{lst:staticfinal}
 \end{listing}
 
-A Preprocessor class is declared in Listing \ref{lst:preprocessor} which contains all of the variability point constants for free access from the rest of the project's packages. The packages may then use these attributes in normal conditional loops to transform them into conditional compilation loops. In Listing \ref{lst:staticfinal}, the method getEnd1 is conditionally compiled so that if the selected product has full access, a reference to end1Element is returned, whereas if the selected product does not have full access, only a copy is returned. This ensures that if the product does not have full access, the user will not be able to directly alter the end1Element variable, being forced to use other methods to do so.
+In the example, a Preprocessor class is declared in Listing \ref{lst:preprocessor} which contains all of the variability point constants for free access from the rest of the project's packages; essentially, we are centralizing the variability management in a single artifact. The packages may then use these attributes in conventional conditional loops to transform them into conditional compilation loops. In Listing \ref{lst:staticfinal}, the method getEnd1 is conditionally compiled so that if the selected product has full access (a \gls{variability} point of the AutoREST application \cite{AUTOREST} that represents security access level), a reference to end1Element is returned. Meanwhile, if the selected product does not have full access, only a copy is returned, ensuring that the object cannot be modified from outside. This ensures that if the product does not have full access, the user will not be able to directly alter the end1Element variable, being forced to use other methods to do so.
 
-This approach has one very important limitation: it can only be used where normal conditional loops may be used. Therefore, it is impossible to conditionally compile an entire method or class, as Java does not permit conditional loop statements to be outside method bodies. While it works in the example above, it does work in the example presented in Listing \ref{lst:staticfinalerror}.
+This approach has one very important limitation: it can only be used where normal conditional loops may be used. Therefore, it is impossible to conditionally compile an entire method or class, as Java does not permit conditional loop statements to be outside method bodies (remember \gls{grammar}s: the rule for \emph{if} statements would be inside the rule for \emph{methods}, meaning that the syntactic analyser would only accept the token ``IF'' when it is found inside a method). While it works in the example above, it does work in the example presented in Listing \ref{lst:staticfinalerror}.
 
 \begin{listing}
 \begin{minted}[frame=single,
@@ -295,15 +298,81 @@ public class UmlAssociation extends UmlElement implements Serializable
 \caption{Limitations of Static Final attributes, taken from \cite{AUTOREST}} \label{lst:staticfinalerror}
 \end{listing}
 
-In this example, an entire constructor should be conditionally compiled so that this particular overload is only available if the configured product has FULLACCESS. While it is possible to place the method's inner code inside a conditional loop, that would mean this overload would still exist, and a programmer using an IDE like NetBeans or Eclipse would be fooled into thinking this overload is available, when in fact it is not. The ideal way of solving this problem would be to remove the method entirely from the compiled .jar file, so that the programmer is not tricked into thinking the method exists. To be able to do this, we fall back into the idea of making our own Java preprocessor, with capabilities similar to the C++ and C\# preprocessors.
+In this example, an entire constructor should be conditionally compiled so that this particular overload is only available if the configured product has full access. While it is possible to place the method's inner code inside a conditional loop, that would mean this overload would still exist, and a programmer using an IDE like NetBeans or Eclipse would be fooled into thinking it is available, when in fact it is not. The ideal way of solving this problem would be to remove the method entirely from the compiled .jar file, so that the programmer is not tricked into thinking the method exists.
+
+The \lstinline{Static Final} form of \gls{variability} management is perfectly valid for situations where a single method may have two different implementations depending on product configuration. It is a simpler way of controlling \gls{variability} than the other approaches discussed ahead, but it must be used with caution. An especially dangerous effect of using \lstinline{Static Final} attributes for \gls{variability} management is that the documentation (Javadoc) cannot be conditionally compiled using this approach, making it virtually impossible to document a variable method properly.
+
+In order to get around \gls{variability} situations like the one in Listing \ref{lst:staticfinalerror}, where a method's availability is dependent on product configuration, it is possible to use one of two other approaches: Java annotations with code reflection, and Java interfaces.
 
 %----------------------------------------------------------
 
-\subsection{Preprocessing with Annotations}
+\subsection{Preprocessing with Reflection}
+\label{sc:annotations}
+
+\textcolor{red}{REVISE USEFULNESS}
+
+%Code reflection is a type of mechanism known as \emph{introspection} where software artifacts are able to analyse and modify themselves during runtime, enabling them to alter their own behaviour based on the software's current conditions. Reflection is one of the oldest programming concepts, dating back to the notion of \emph{self-modifying code} which was present in the earliest assembly language codes. Back then, the idea was basically to keep code inside the data portions of a software and then pull them into the processing portions, essentially changing the execution of the program. Of course, this caused several maintainability problems back then, and occasioned numerous bugs resulting from unexpected runtime modifications. Eventually, the practice was dropped entirely and labeled as bad practice.
+
+%The modern notion of reflection is slightly different from self-modifying code. Control mechanisms are set in place in modern programming languages that implement introspection, and the degree to which a program may be modified during runtime is greatly reduced to avoid unexpected behaviour or ``write-only'' code. In Java, one of the mechanisms that constrain reflection and make it relatively more safe to use are \emph{annotations}. Java annotations can be seen as a type of system attribute. By applying an annotation to a Java element like a class or method, the programmer is essentially adding information about that element that can be used to make decisions about it. This practice is very well-known primarily through the unit testing framework JUnit \cite{JUNIT}, which uses annotations to mark methods so that the framework may know how to test them.
+
+%In our case, the annotations would serve to tell the program whether a particular method is to be used or not depending on product configuration. Take, for instance, Listing \ref{lst:annotations1}, which presents the code of a method that uses annotations to make a decision regarding what method to invoke.
+
+%\begin{listing}
+%\begin{minted}[frame=single,
+%               framesep=3mm,
+%               linenos=true,
+%               xleftmargin=21pt,
+%               breaklines=true,
+%               tabsize=4]{java}
+%public class plets
+%{
+%  ...
+%
+%  public generateScript(Object obj, ScriptGenerationStructure structure)
+%  {
+%    Class classType = obj.getClass();
+%    for (Method method : classType.getMethods())
+%    {
+%      if(method.isAnnotationPresent(GenerateScript.class))
+%    }
+%  }
+%
+%  ...
+%}
+
+%public class ParserVariantFactory
+%{
+%  public static Object getParser(String moduleType)
+%  {
+%    Class classType = this.getClass();
+%    for(Method method : classType.getMethods())
+%    {
+%      if(method.isAnnotationPresent(PerformanceModelParser.class) && status.toLowerCase().equals("performancemodelparser"))
+%      {
+%        return method.invoke(this);
+%      }
+%      if(method.isAnnotationPresent(FunctionalModelParser.class) && status.toLowerCase().equals("functionalmodelparser"))
+%      {
+%        return method.invoke(this);
+%      }
+%    }
+%  }
+
+
+%}
+%\end{minted}
+%\caption{Example of use of annotations for variability management} \label{lst:annotations1}
+%\end{listing}
+
+%----------------------------------------------------------
+
+\subsection{Interfaces as Variant-Selection Mechanisms}
+\label{sc:interfaces}
 
 %----------------------------------------------------------
 
 \subsection{Java Preprocessor Project}
+\label{sc:prepros}
 
 %TODO: use UmlElement's "public" as example of use.
 %TODO: use UmlAssociation's constructors as example of use.
