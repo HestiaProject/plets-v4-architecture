@@ -26,9 +26,12 @@ The Java \gls{grammar}s and \gls{regex}s are purely pedagogical, and in no way r
 
 Most of our professionals are unaware of the exact way through which compilers work, but a basic understanding of their mechanisms is necessary to fully comprehend the uses of compilation directives. Compilers can generally be divided in three or four smaller tools that, together, execute the entire compilation process. These are the Lexical Analyser, the Syntactic Analyser, the Semantic Analyser, and, optionally, the Code Generator. Other features can be included in compilers, such as code optimizers, but these are not covered here.
 
+Section \ref{sc:regex} covers the basics of \gls{regex}s, which are fundamental tools for the appropriate implementation of almost any software system. Section \ref{sc:lex} briefly explains the purpose of lexical analysers, and how they make use of \gls{regex}s to prepare a stream of text for compilation. Section \ref{sc:syn} attempts to give a sufficient understanding of syntactic analysis and \gls{grammar}s within their application in compiler technology. Finally, Section \ref{sc:sem} presents the basics of semantic analysis, in order to prepare the reader for the more advanced concepts presented in Section \ref{sc:compjava}.
+
 %----------------------------------------------------------
 
 \subsection{Regular Expressions}
+\label{sc:regex}
 
 The simplest unit of analysis that a compiler uses is a stream of text, or a string. These streams of text, while usually structured according to a \gls{grammar}, may be formed of any number of compositions of characters, and identifying these compositions as the structural units of a \gls{grammar} require these units to have their own individual composition rules. These rules are called \gls{regex}s. A \gls{regex} is a structured string of characters that define a pattern. This pattern can then be compared to any other string to see whether it conforms to the \gls{regex} or not.
 
@@ -81,6 +84,7 @@ Understanding and being able to write \gls{regex}s is a basic skill that is expe
 %----------------------------------------------------------
 
 \subsection{Lexical Analyser}
+\label{sc:lex}
 
 The lexical analyser is the part of a compiler that is responsible for \emph{tokenizing} the input text. What this means is that the stream that is sent as input to the compiler is fully read and divided into its basic units, such as ``identifiers'' and ``reserved words'', by matching them to a list of \gls{regex}s that define each type of token. Essentially, a stream of text is transformed into a list of values that the compiler understands. This is important for the compilation process as the steps that follow (syntactic and semantic analysis) \emph{are not entirely concerned with the exact text included in the input, but rather with its structure}. This tokenization process is generally executed in a single pass (meaning the stream is read only once), and outputs an ordered list of tokens. To better understand the process of lexical analysis, let us take another look at Listing \ref{lst:helloworldjava}.
 
@@ -104,6 +108,7 @@ Understanding lexical analysis on its own may appear confusing, as it is largely
 %----------------------------------------------------------
 
 \subsection{Syntactic Analyser}
+\label{sc:syn}
 
 The syntactic analyser is charged with making sense of the tokens provided by the lexical analyser. What it does is check the order of these tokens against a set of rules, called a \gls{grammar}, to see whether the input text makes sense or not (whether it is a \emph{valid word} of the language). The importance of this is to guarantee that the input text is in the right format for the compiler, so that it may be able to interpret the file properly. Think of it as checking the structure of a sentence in natural language, and making sure that pronouns, nouns, verbs, adjectives, etc. are used correctly.
 
@@ -167,6 +172,7 @@ At this point, you should understand the basics of why we define tokens, and how
 %----------------------------------------------------------
 
 \subsection{Semantic Analyser}
+\label{sc:sem}
 
 The semantic analyser is in charge of deciding what the input text means after the syntactic analyser has assured it that the text is well-formed. The semantic analyser will essentially be a software application itself, treating input text according to what it receives. For example, a semantic analyser for the previous example in Listing \ref{lst:condgrammar} would include a program, or a piece of code, stating that when the syntactic rule ``conditional'' is found, the string identified by the rule ``code'' will only be compiled if the constant named by the ``IDENTIFIER'' token was defined before compilation. In the case of the code in Listing \ref{lst:helloworldjavacond}, the semantic analyser would state that if PRINT is not defined, then the statement inside the conditional should not be compiled. Essentially, it says ``if PRINT is false, ignore everything in this block''.
 
@@ -202,7 +208,7 @@ The Java Preprocessor study is therefore dedicated to finding a way to define co
 \section{Compilation Directives in Java}
 \label{sc:compjava}
 
-
+In order to implement a system that has \gls{variability}, mechanisms must be set in place in the code to control it, trace it and maintain it. The number of proposed \gls{variability} control mechanisms is quite possibly uncountable, with new ones being proposed every year to handle novel situations in \acrshort{sple}, \acrshort{cbse} and other software engineering fields that rely on \gls{variability}. In this section, we will explore \gls{variability} control mechanisms specific to the Java programming language.
 
 %----------------------------------------------------------
 

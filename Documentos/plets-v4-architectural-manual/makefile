@@ -1,17 +1,17 @@
 all:
 	{ \
-	rm "autorest_report_laser_dumer".pdf ;\
-	latexmk -pdf -shell-escape principal.tex ;\
-	mv principal.pdf "autorest_report_laser_dumer".pdf ;\
+	rm "plets-v4-architectural-manual".pdf ;\
+	latexmk -pdf -shell-escape main.tex ;\
+	mv main.pdf "plets-v4-architectural-manual".pdf ;\
 	latexmk -CA ;\
-	rm -R _minted-principal ;\
-	rm principal.bbl ;\
-	rm principal.glo ;\
-	rm principal.ist ;\
-	rm principal.glg ;\
-	rm principal.gls ;\
-	rm principal.alg ;\
-	rm principal.acr ;\
-	rm principal.acn ;\
-	evince "autorest_report_laser_dumer".pdf ;\
+	rm -R _minted-main ;\
+	rm main.bbl ;\
+	rm main.glo ;\
+	rm main.ist ;\
+	rm main.glg ;\
+	rm main.gls ;\
+	rm main.alg ;\
+	rm main.acr ;\
+	rm main.acn ;\
+	evince "plets-v4-architectural-manual".pdf ;\
 	}
