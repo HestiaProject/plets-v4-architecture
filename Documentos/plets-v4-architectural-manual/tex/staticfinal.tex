@@ -210,7 +210,7 @@ The Java Preprocessor study is therefore dedicated to finding a way to define co
 
 In order to implement a system that has \gls{variability}, mechanisms must be set in place in the code to control it, trace it and maintain it. The number of proposed \gls{variability} control mechanisms is quite possibly uncountable, with new ones being proposed every year to handle novel situations in \acrshort{sple}, \acrshort{cbse} and other software engineering fields that rely on \gls{variability}. In this section, we will explore \gls{variability} control mechanisms specific to the Java programming language. All of the mechanisms presented in this section have merit, and each is suited for different kinds of \gls{variability} management. Therefore, a good understanding of all mechanisms and when to apply them is important.
 
-Section \ref{sc:sfa} presents a ``quick-fix'' form of \gls{variability} management in Java, relying on the built-in code optimizers of Java compilers to force \gls{variability} into the source code. Section \ref{sc:annotations} explores the possibility of using Java annotations and code reflection to implement \gls{variability} points. Section \ref{sc:interfaces} re-evaluates the primary mechanism of PLeTs v1, interfaces, as well as presenting a new form of using them for selecting \gls{variant}s. Finally, Section \ref{sc:prepros} presents the proposal of a Java preprocessor to include first-class compilation directives into the language.
+Section \ref{sc:sfa} presents a ``quick-fix'' form of \gls{variability} management in Java, relying on the built-in code optimizers of Java compilers to force \gls{variability} into the source code. Section \ref{sc:reflection} explores the possibility of using Java code reflection to implement \gls{variability} points. Section \ref{sc:interfaces} re-evaluates the primary mechanism of PLeTs v1, interfaces, as well as presenting a new form of using them for selecting \gls{variant}s. Finally, Section \ref{sc:prepros} presents the proposal of a Java preprocessor to include first-class compilation directives into the language.
 
 %----------------------------------------------------------
 
@@ -302,67 +302,12 @@ In this example, an entire constructor should be conditionally compiled so that 
 
 The \lstinline{Static Final} form of \gls{variability} management is perfectly valid for situations where a single method may have two different implementations depending on product configuration. It is a simpler way of controlling \gls{variability} than the other approaches discussed ahead, but it must be used with caution. An especially dangerous effect of using \lstinline{Static Final} attributes for \gls{variability} management is that the documentation (Javadoc) cannot be conditionally compiled using this approach, making it virtually impossible to document a variable method properly.
 
-In order to get around \gls{variability} situations like the one in Listing \ref{lst:staticfinalerror}, where a method's availability is dependent on product configuration, it is possible to use one of two other approaches: Java annotations with code reflection, and Java interfaces.
+In order to get around \gls{variability} situations like the one in Listing \ref{lst:staticfinalerror}, where a method's availability is dependent on product configuration, it is possible to use one of two other approaches: Java code reflection, and Java interfaces.
 
 %----------------------------------------------------------
 
 \subsection{Preprocessing with Reflection}
-\label{sc:annotations}
-
-\textcolor{red}{REVISE USEFULNESS}
-
-%Code reflection is a type of mechanism known as \emph{introspection} where software artifacts are able to analyse and modify themselves during runtime, enabling them to alter their own behaviour based on the software's current conditions. Reflection is one of the oldest programming concepts, dating back to the notion of \emph{self-modifying code} which was present in the earliest assembly language codes. Back then, the idea was basically to keep code inside the data portions of a software and then pull them into the processing portions, essentially changing the execution of the program. Of course, this caused several maintainability problems back then, and occasioned numerous bugs resulting from unexpected runtime modifications. Eventually, the practice was dropped entirely and labeled as bad practice.
-
-%The modern notion of reflection is slightly different from self-modifying code. Control mechanisms are set in place in modern programming languages that implement introspection, and the degree to which a program may be modified during runtime is greatly reduced to avoid unexpected behaviour or ``write-only'' code. In Java, one of the mechanisms that constrain reflection and make it relatively more safe to use are \emph{annotations}. Java annotations can be seen as a type of system attribute. By applying an annotation to a Java element like a class or method, the programmer is essentially adding information about that element that can be used to make decisions about it. This practice is very well-known primarily through the unit testing framework JUnit \cite{JUNIT}, which uses annotations to mark methods so that the framework may know how to test them.
-
-%In our case, the annotations would serve to tell the program whether a particular method is to be used or not depending on product configuration. Take, for instance, Listing \ref{lst:annotations1}, which presents the code of a method that uses annotations to make a decision regarding what method to invoke.
-
-%\begin{listing}
-%\begin{minted}[frame=single,
-%               framesep=3mm,
-%               linenos=true,
-%               xleftmargin=21pt,
-%               breaklines=true,
-%               tabsize=4]{java}
-%public class plets
-%{
-%  ...
-%
-%  public generateScript(Object obj, ScriptGenerationStructure structure)
-%  {
-%    Class classType = obj.getClass();
-%    for (Method method : classType.getMethods())
-%    {
-%      if(method.isAnnotationPresent(GenerateScript.class))
-%    }
-%  }
-%
-%  ...
-%}
-
-%public class ParserVariantFactory
-%{
-%  public static Object getParser(String moduleType)
-%  {
-%    Class classType = this.getClass();
-%    for(Method method : classType.getMethods())
-%    {
-%      if(method.isAnnotationPresent(PerformanceModelParser.class) && status.toLowerCase().equals("performancemodelparser"))
-%      {
-%        return method.invoke(this);
-%      }
-%      if(method.isAnnotationPresent(FunctionalModelParser.class) && status.toLowerCase().equals("functionalmodelparser"))
-%      {
-%        return method.invoke(this);
-%      }
-%    }
-%  }
-
-
-%}
-%\end{minted}
-%\caption{Example of use of annotations for variability management} \label{lst:annotations1}
-%\end{listing}
+\label{sc:reflection}
 
 %----------------------------------------------------------
 

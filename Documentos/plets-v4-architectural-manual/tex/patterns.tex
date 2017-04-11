@@ -1,13 +1,35 @@
 \chapter{Architectural and Design Patterns in PLeTs v4}
 \label{ch:patterns}
 
+While Chapter \ref{ch:staticfinal} focused on the specific code mechanisms used to implement variability management in Java, this chapter approaches the problem from a higher-level perspective, analysing patterns that may be applied to solve common problems that arise during the course of design and development. While the topics of design patterns \cite{GAMMA:1995} and architectural patterns \cite{TAYLOR:2009} are very deeply studied in several excellent works, this document seeks to apply a specific few to solving the problems that were identified in PLeTs in the past (v1-3) and which are expected to arise over the course of PLeTs v4.
+
+The differences between architectural and design patterns are substantial and very important (see \cite{TAYLOR:2009}), but for the purposes of this document they will be treated as virtually the same. Many of the problems raised in this chapter in the current version of this document are still open problems in the design and architecture of PLeTs v4, and therefore any input provided is welcome.
+
 %----------------------------------------------------------
 
-\section{Variant Factory}
+\section*{How to read this chapter}
+
+This chapter is written to serve as both an introduction to the patterns used in PLeTs v4 and as a reference guide for use over the course of the project. Any information regarding the situations in which to apply a pattern or form of its implementation should first be sought in this document.
+
+Section \ref{sc:factory} briefly presents the Factory design pattern, based on the original description by Gamma et al. \cite{GAMMA:1995}, as well as the more specific application of it in PLeTs, called the Variant Factory \cite{LASER:2015}.
+
+Section \ref{sc:connectors} \emph{very} briefly presents the notions of software \gls{connector}s, based on the description by Taylor et al. \cite{TAYLOR:2009}, with an emphasis on the linkage- and arbitrator-type \gls{connector}s.
+
+Section \ref{sc:builder} follows up on these concepts with the idea of the architectural pattern behind the dynamic composition and communication of modules within products that is the cornerstone of PLeTs v4. We explore two architectural styles, Distributed Objects (best known for its flagship framework, \acrshort{corba} \cite{CORBA:2012}) and C2 (described in detail in \cite{TAYLOR:2009}), and how ideas from each of them were used to conceive the ``Builder'' \textcolor{red}{(name pending)} Architectural Pattern for PLeTs v4.
+
+%----------------------------------------------------------
+
+\section{Factory Pattern}
+\label{sc:factory}
+
+%----------------------------------------------------------
+
+\subsection{Variant Factory}
 
 %----------------------------------------------------------
 
 \section{Software Connectors}
+\label{sc:connectors}
 
 %----------------------------------------------------------
 
@@ -19,8 +41,13 @@
 
 %----------------------------------------------------------
 
-\section{PLeTs v4 ArchPatt - ``Builder"}
+\section{PLeTs v4 Architectural Pattern - ``Builder''}
+\label{sc:builder}
 
 %----------------------------------------------------------
 
 \subsection{Distributed Objects Architectural Style}
+
+%----------------------------------------------------------
+
+\subsection{C2 Architectural Style}
