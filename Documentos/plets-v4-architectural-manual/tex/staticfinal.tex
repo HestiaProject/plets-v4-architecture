@@ -309,6 +309,97 @@ In order to get around \gls{variability} situations like the one in Listing \ref
 \subsection{Preprocessing with Reflection}
 \label{sc:reflection}
 
+Code reflection\footnote{Written with sizeable contributions from Anderson Domingues} is a type of mechanism known as \emph{introspection} where software artifacts are able to analyse and modify themselves during runtime, enabling them to alter their own behaviour based on the software's current conditions. Reflection is one of the oldest programming concepts, dating back to the notion of \emph{self-modifying code} which was present in the earliest assembly language codes. Back then, the idea was basically to keep code inside the data portions of a software and then pull them into the processing portions, essentially changing the execution of the program. Of course, this caused several maintainability problems back then, and occasioned numerous bugs resulting from unexpected runtime modifications. Eventually, the practice was dropped entirely and labeled as bad practice.
+
+The modern notion of reflection is slightly different from self-modifying code. Control mechanisms are set in place in modern programming languages that implement introspection, and the degree to which a program may be modified during runtime is greatly reduced to avoid unexpected behaviour or ``write-only'' code. Among these mechanisms is the restriction that is placed on reflection to be used only to alter runtime behaviour, rather than making permanent modifications to executables and libraries.
+
+While compilation directives are not readily available in Java, it is possible to create a mechanism equal to (and perhaps simpler than) the Variant Factory proposed in \cite{LASER:2015} by using code reflection. The process is similar to that used in C\#: an interface is created to represent a variability point, declaring its public signature, and a Factory class is used to instantiate \gls{variant}s based on that interface. In this implementation, however, we simplify the code related to choosing a \gls{variant} by using reflection to analyse the available \gls{variant}s for a suitable one. This both removes the need to alter the Factory code when a \gls{variant} is created and makes it possible for the system to use a single Factory to realize all \gls{variant}s.
+
+First, the interface for a particular \gls{vpoint} is implemented in its own isolated deployment package, so as to make any dependencies to it restricted and well-controlled. This interface must specify all of the necessary public methods of any \gls{variant} that implements this \gls{vpoint}, and may be declared with default behavior when appropriate (see Listing \ref{lst:vpointinterface}).
+
+\begin{listing}
+\begin{minted}[frame=single,
+               framesep=3mm,
+               linenos=true,
+               xleftmargin=21pt,
+               breaklines=true,
+               tabsize=4]{java}
+package ParserVariationPoint;
+
+public interface IParser
+{
+  default Object parse(Object input)
+  {
+    return null;
+  }
+}
+\end{minted}
+\caption{Example of \gls{vpoint} interface} \label{lst:vpointinterface}
+\end{listing}
+
+Next, the \gls{variant}s must be created, also in their own deployment packages, with a facade that implements the \gls{vpoint} interface. Listing \ref{lst:variantfacade} shows an example of this.
+
+\begin{listing}
+\begin{minted}[frame=single,
+               framesep=3mm,
+               linenos=true,
+               xleftmargin=21pt,
+               breaklines=true,
+               tabsize=4]{java}
+package ParserX;
+
+import packageName.IParser;
+
+public class ParserX implements IParser
+{
+  public Object parse(Object input)
+  {
+    //execute
+  }
+}
+\end{minted}
+\caption{Example of \gls{variant} facade} \label{lst:variantfacade}
+\end{listing}
+
+At this point, all of the necessary components are in place for us to build a Variant Factory. Listing \ref{lst:variantfactory} presents an example of a Variant Factory implementation. In particular, this implementation uses the notion of ``instructions'' \textcolor{red}{(research pending)} to select which available \gls{variant} best satisfies the request.
+
+%-----------------------------VLAD AQUI----------------------------
+%-----------------------------VLAD AQUI----------------------------
+%-----------------------------VLAD AQUI----------------------------
+%-----------------------------VLAD AQUI----------------------------
+%-----------------------------VLAD AQUI----------------------------
+
+\begin{listing}
+\begin{minted}[frame=single,
+               framesep=3mm,
+               linenos=true,
+               xleftmargin=21pt,
+               breaklines=true,
+               tabsize=4]{java}
+public class VariantFactory
+{
+  public static Object getInstanceOf(Class c, Configuration f) throws Exception
+  {
+    //foreach class d that implements c.getClass, if f.contains(d), return d instance;
+  }
+
+  public static Object getInstanceOf(Class c, Configuration f, Instructions i)
+  {
+    //if i == null, getInstanceOf(c,f);
+
+    //foreach class d that implements c.getClass, if f.contains(d) and d follows i, return d instance;
+  }
+}
+\end{minted}
+\caption{Example of Variant Factory} \label{lst:variantfactory}
+\end{listing}
+
+%-----------------------------VLAD AQUI----------------------------
+%-----------------------------VLAD AQUI----------------------------
+%-----------------------------VLAD AQUI----------------------------
+%-----------------------------VLAD AQUI----------------------------
+%-----------------------------VLAD AQUI----------------------------
+
 %----------------------------------------------------------
 
 \subsection{Interfaces as Variant-Selection Mechanisms}
