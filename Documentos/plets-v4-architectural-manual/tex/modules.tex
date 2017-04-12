@@ -1,66 +1,48 @@
 \chapter{PLeTs v4 Modules}
 \label{ch:modules}
 
-%PLeTs is a product line of bla bla bla, and it focuses on bla bla bla. So on and so forth.
+\textcolor{red}{Brief introduction of what PLeTs is, presentation of the Feature Model, explanation of the purpose of the project from the point of view of the Testing domain. 2-4 paragraphs should be enough.}
 
 %----------------------------------------------------------
 
-\section{Input Processing}
+\section{Variability Point 1}
 
-%The process of Input Processing is bla bla bla, it is used bla bla bla. In our work we have mainly used bla bla bla, through techniques of bla bla bla.
-
-%----------------------------------------------------------
-
-\subsection{XML Reader}
+\textcolor{red}{Description of the variability point, what its role is in the product line, what are the typical input and output artifacts. 1-3 paragraphs per variability point should be enough.}
 
 %----------------------------------------------------------
 
-\section{Test Sequence Generation}
+\subsection{Variant 1.A}
 
-%Test Sequence Generation modules are in charge of bla bla bla, they use techniques such as bla bla bla.
+\textcolor{red}{Very brief description of the variant (1 paragraph) and definition of the interface in the following format or similar:}
 
-%----------------------------------------------------------
+\begin{listing}
+In:
+\\  - Artifact 1 (described in \ref{})
+\\  - Artifact 2 (described in \ref{})
+\\Out:
+\\  - Artifact 3 (described in \ref{})
+\\Inout:
+\\  - Artifact 4 (described in \ref{})
+\\Pre-Condition:
+\\  - Constraint a
+\\  - Constraint b
+\\Post-Condition:
+\\  - Constraint c
+\caption{Variant 1.A Interface}
+\end{listing}
 
-\subsection{Depth-First Search}
-
-%----------------------------------------------------------
-
-\subsection{Breadth-First Search}
-
-%----------------------------------------------------------
-
-\section{Test Case Generator}
-
-%Test Case Generation is the stage that bla bla bla
-
-%----------------------------------------------------------
-
-\subsection{Performance Test Case Generator}
-
-%----------------------------------------------------------
-
-\section{Test Script Generation}
-
-%Test Script Generation is meant to use bla bla bla to generate bla bla bla.
+\textcolor{red}{Artifacts will generally be files or physical data structures. Inout artifacts represent artifacts that are both input and output. Constraints will typically be a brief description of the process executed by the variant, and rules as to what may or may not be modified (in the artifacts) over the course of its operation. Not all Variants will have Constraints, and constraints are typically applied to inout artifacts.}
 
 %----------------------------------------------------------
 
-\subsection{JMeter Script Generator}
+\subsection{Variant 1.B}
 
 %----------------------------------------------------------
 
-\subsection{Oracle Application Testing Suite (OATS) Script Generator}
+\section{Variability Point 2}
 
 %----------------------------------------------------------
 
-\section{Test Executor}
+\subsection{Variant 2.A}
 
-%The Test Executor modules should bla bla bla, and the results will bla bla bla.
-
-%----------------------------------------------------------
-
-\subsection{JMeter Test Executor}
-
-%----------------------------------------------------------
-
-\subsection{Oracle Application Testing Suite (OATS) Test Executor}
+%etc.

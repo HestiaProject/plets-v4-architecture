@@ -302,7 +302,16 @@ In this example, an entire constructor should be conditionally compiled so that 
 
 The \lstinline{Static Final} form of \gls{variability} management is perfectly valid for situations where a single method may have two different implementations depending on product configuration. It is a simpler way of controlling \gls{variability} than the other approaches discussed ahead, but it must be used with caution. An especially dangerous effect of using \lstinline{Static Final} attributes for \gls{variability} management is that the documentation (Javadoc) cannot be conditionally compiled using this approach, making it virtually impossible to document a variable method properly.
 
-In order to get around \gls{variability} situations like the one in Listing \ref{lst:staticfinalerror}, where a method's availability is dependent on product configuration, it is possible to use one of two other approaches: Java code reflection, and Java interfaces.
+In order to get around \gls{variability} situations like the one in Listing \ref{lst:staticfinalerror}, where a method's availability is dependent on product configuration, it is possible to use one of two other approaches: Java interfaces and Java code reflection,.
+
+%----------------------------------------------------------
+
+\subsection{Interfaces as Variant-Selection Mechanisms}
+\label{sc:interfaces}
+
+One viable solution for the problem of selectively enabling methods raised at the end of Section \ref{sc:sfa} is to encapsulate the public interface of a class through use of explicit interfaces. Through the Separated Interface pattern \cite{FOWLER:2002}, we are able to make packages with the express purpose of encapsulating \gls{variant}s, choosing which parts of a class (usually a facade) will be available to the rest of the system.
+
+The basic notion of the Separated Interface pattern is for the system to only access a package's interface, with the implementation being plugged in through a factory.
 
 %----------------------------------------------------------
 
@@ -348,7 +357,7 @@ Next, the \gls{variant}s must be created, also in their own deployment packages,
                tabsize=4]{java}
 package ParserX;
 
-import packageName.IParser;
+import ParserVariationPoint.IParser;
 
 public class ParserX implements IParser
 {
@@ -361,13 +370,7 @@ public class ParserX implements IParser
 \caption{Example of \gls{variant} facade} \label{lst:variantfacade}
 \end{listing}
 
-At this point, all of the necessary components are in place for us to build a Variant Factory. Listing \ref{lst:variantfactory} presents an example of a Variant Factory implementation. In particular, this implementation uses the notion of ``instructions'' \textcolor{red}{(research pending)} to select which available \gls{variant} best satisfies the request.
-
-%-----------------------------VLAD AQUI----------------------------
-%-----------------------------VLAD AQUI----------------------------
-%-----------------------------VLAD AQUI----------------------------
-%-----------------------------VLAD AQUI----------------------------
-%-----------------------------VLAD AQUI----------------------------
+At this point, all of the necessary components are in place for us to build a Variant Factory. Listing \ref{lst:variantfactory} presents an example of a Variant Factory implementation. In particular, this implementation uses the notion of \emph{constraints} to select which available \gls{variant} best satisfies the request. This and other improvements on the Variant Factory pattern will be reviewed in Chapter \ref{ch:patterns}. For now, focus on the use of reflection and assume that the statement \lstinline{i.satisfies(v)} always evaluates to \lstinline{true}.
 
 \begin{listing}
 \begin{minted}[frame=single,
@@ -376,34 +379,34 @@ At this point, all of the necessary components are in place for us to build a Va
                xleftmargin=21pt,
                breaklines=true,
                tabsize=4]{java}
-public class VariantFactory
+package ParserFactory;
+
+import ParserVariationPoint.IParser;
+
+public class ParserFactory
 {
-  public static Object getInstanceOf(Class c, Configuration f) throws Exception
+  public static Object getInstanceOf(Configuration f, Constraints i) throws Exception
   {
-    //foreach class d that implements c.getClass, if f.contains(d), return d instance;
-  }
-
-  public static Object getInstanceOf(Class c, Configuration f, Instructions i)
-  {
-    //if i == null, getInstanceOf(c,f);
-
-    //foreach class d that implements c.getClass, if f.contains(d) and d follows i, return d instance;
+    List<Feature> l = f.getFeature("Parser"));
+    for(Feature v : l)
+    {
+      if(i.satisfies(v))
+      {
+        Class<?> clazz = Class.forName(v.getPath());
+        Constructor<?> ctor = clazz.getConstructor();
+        return ctor.newInstance();
+      }
+    }
+    throw new Exception("Feature not available for: \textless" + c.getName() + "\textgreater");
   }
 }
 \end{minted}
 \caption{Example of Variant Factory} \label{lst:variantfactory}
 \end{listing}
 
-%-----------------------------VLAD AQUI----------------------------
-%-----------------------------VLAD AQUI----------------------------
-%-----------------------------VLAD AQUI----------------------------
-%-----------------------------VLAD AQUI----------------------------
-%-----------------------------VLAD AQUI----------------------------
+First, the code in Listing \ref{lst:variantfactory} acquires a list of all the \gls{variant}s of the \gls{vpoint} ``Parser''. Then, iterating over that list, it evaluates each \gls{variant} against the constraints imposed by the requesting module, and if a feature satisfies those constraints, an instance of that \gls{variant} is returned.
 
-%----------------------------------------------------------
-
-\subsection{Interfaces as Variant-Selection Mechanisms}
-\label{sc:interfaces}
+By using reflection in this manner, we have solved the problem of selecting a \gls{variant} represented by an entire class, which was not possible by using a Static Final attribute. We are now able to implement the exact same capacities of the Variant Factory pattern described in \cite{LASER:2015}, and therefore have a way of selecting \gls{variant}s dynamically.
 
 %----------------------------------------------------------
 
