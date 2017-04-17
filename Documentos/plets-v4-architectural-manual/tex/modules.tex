@@ -7,7 +7,19 @@
 
 \section{Variability Point 1}
 
-\textcolor{red}{Description of the variability point, what its role is in the product line, what are the typical input and output artifacts. 1-3 paragraphs per variability point should be enough.}
+\textcolor{red}{Description of the variability point (each abstract feature), what its role is in the product line, what are the typical input and output artifacts. 1-3 paragraphs per variability point should be enough. If the variability point has specific details, enter them in the following format or similar:}
+
+\begin{listing}
+Involved constraints:
+\\  - Constraint a
+\\  - Constraint b
+\\External dependencies:
+\\  - Dependency a
+\\  - Dependency b
+\caption{Variant 1.A Interface}
+\end{listing}
+
+\textcolor{red}{Variability point constraints are those constraints between features, such as \emph{requires} and \emph{excludes}. External dependencies are any dependencies that the variability point has to hardware or external software, such as ``requires having Tool a installed''.}
 
 %----------------------------------------------------------
 
@@ -24,18 +36,36 @@ In:
 \\Inout:
 \\  - Artifact 4 (described in \ref{})
 \\Pre-Condition:
-\\  - Constraint a
-\\  - Constraint b
+\\  - Inner Constraint a
+\\  - Inner Constraint b
 \\Post-Condition:
-\\  - Constraint c
+\\  - Inner Constraint c
+\\Invariants:
+\\  - Invariant a
+\\Involved constraints:
+\\  - Outer Constraint a
+\\  - Outer Constraint b
+\\External dependencies:
+\\  - Dependency a
+\\  - Dependency b
 \caption{Variant 1.A Interface}
 \end{listing}
 
-\textcolor{red}{Artifacts will generally be files or physical data structures. Inout artifacts represent artifacts that are both input and output. Constraints will typically be a brief description of the process executed by the variant, and rules as to what may or may not be modified (in the artifacts) over the course of its operation. Not all Variants will have Constraints, and constraints are typically applied to inout artifacts.}
+\textcolor{red}{Artifacts will generally be files or physical data structures. If they are a feature of the product line, a reference to that feature suffices. If not, a section must be created to briefly describe the artifact. Inout artifacts represent artifacts that are both input and output. Inner Constraints will typically be a brief description of the process executed by the variant, and rules as to what may or may not be modified (in the artifacts) over the course of its operation. Not all Variants will have Inner Constraints, and inner constraints are typically applied to inout artifacts. Invariants are any information that must be valid throughout the execution of the variant, and are used primarily to specify restrictions on shared-access data structures and parallel execution (generally none should be present in PLeTs). External dependencies work the same way as in Variability Points.}
 
 %----------------------------------------------------------
 
 \subsection{Variant 1.B}
+
+%----------------------------------------------------------
+
+\section{Variability Point 1.B.1}
+
+\textcolor{red}{A variant may have its own variability points. These lower-level variability points and their variants must be documented in the same way as the higher-level ones.}
+
+%----------------------------------------------------------
+
+\subsection{Variant 1.B.1.A}
 
 %----------------------------------------------------------
 
@@ -44,5 +74,11 @@ In:
 %----------------------------------------------------------
 
 \subsection{Variant 2.A}
+
+%----------------------------------------------------------
+
+\section{Artifact 1}
+
+\textcolor{red}{All artifacts that interact with the tool over the course of its execution must be specified or minimally described. Those artifacts that are not features of the product line, such as files or input parameters, may be described in stand-alone sections such as this one. Short descriptions of 1 paragraph should suffice for this.}
 
 %etc.
