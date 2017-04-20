@@ -313,6 +313,92 @@ One viable solution for the problem of selectively enabling methods raised at th
 
 The basic notion of the Separated Interface pattern is for the system to only access a package's interface, with the implementation being plugged in through a factory.
 
+\begin{listing}
+\begin{minted}[frame=single,
+               framesep=3mm,
+               linenos=true,
+               xleftmargin=21pt,
+               breaklines=true,
+               tabsize=4]{java}
+package ParserPackageA;
+
+public interface ParserA
+{
+  Object method1();
+}
+\end{minted}
+\caption{Interface making only method1 available.} \label{lst:interface1}
+\end{listing}
+
+\begin{listing}
+\begin{minted}[frame=single,
+               framesep=3mm,
+               linenos=true,
+               xleftmargin=21pt,
+               breaklines=true,
+               tabsize=4]{java}
+package ParserPackageB;
+
+public interface ParserB
+{
+  Object method2();
+}
+\end{minted}
+\caption{Interface making only method2 available.} \label{lst:interface2}
+\end{listing}
+
+\begin{listing}
+\begin{minted}[frame=single,
+               framesep=3mm,
+               linenos=true,
+               xleftmargin=21pt,
+               breaklines=true,
+               tabsize=4]{java}
+package ConcreteParserPackage;
+
+import ParserPackageA.ParserA;
+import ParserPackageB.ParserB;
+
+public class ConcreteParser extends ParserA, ParserB
+{
+  Object method1()
+  {
+    ...
+  }
+
+  Object method2()
+  {
+    ...
+  }
+}
+\end{minted}
+\caption{Concrete Parser implementation.} \label{lst:interfaceconcrete}
+\end{listing}
+
+\begin{listing}
+\begin{minted}[frame=single,
+               framesep=3mm,
+               linenos=true,
+               xleftmargin=21pt,
+               breaklines=true,
+               tabsize=4]{java}
+package ParserFactoryPackage;
+
+import ConcreteParserPackage.ConcreteParser;
+import ParserPackageA.ParserA;
+import ParserPackageB.ParserB;
+
+public class ParserFactory
+{
+  public Parser getInstance()
+  {
+    return new ConcreteParser();
+  }
+}
+\end{minted}
+\caption{Factory to plug ConcreteParser into the available interface.} \label{lst:interfacefactory}
+\end{listing}
+
 %----------------------------------------------------------
 
 \subsection{Preprocessing with Reflection}
