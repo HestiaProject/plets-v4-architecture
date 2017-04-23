@@ -1,0 +1,305 @@
+\chapter{Variability Mechanisms}
+\label{ch:mechanisms}
+
+In order to control variability, it is important to have mechanisms in place to manage that variability in terms of configuration (both in terms of products and in terms of modules), traceability (identifying portions of code and linking them to models), solution building (again, both in terms of products and in terms of modules), access security (management of code-access permissions), non-functional properties (managing variability in qualitative terms such as performance and reliability) and several other concerns that exist in the fields of Software Engineering that deal with variability, such as \acrfull{cbse} and \acrfull{sple}.
+
+Variability mechanisms can be considered to have a ``\gls{bindtime}'' (such as compile, link, load, run, etc.). The mechanisms presented in this chapter have varying \gls{bindtime}s, but for simplification purposes, we consider them to be either bound at compile-time, load-time or run-time. While PLeTs v3 was primarily bound during compile-time (with run-time binding being theoretically possible but untested), the new architecture aims to permit a more varying \gls{bindtime} so as to allow the evolution into a \emph{dynamic} \acrshort{spl}.
+
+Section \ref{sc:interfaces} re-evaluates the primary mechanism of PLeTs v1, component interfaces, as well as presenting a new form of using them for selecting \gls{variant}s automatically in PLeTs v4. Section \ref{sc:params} presents a parameter-based form of \gls{variability} management in Java, relying on run-time conditionals. Section \ref{sc:reflection} shows how to use Java code reflection to implement \gls{variability} points using a variation of the Factory Method \cite{GAMMA:1995}. Section \ref{sc:prepros} presents the javapp tool \cite{KROPF:2015} to include preprocessing directives to Java in the fashion of C directives. Finally, Section \ref{sc:ant} briefly presents the Ant build system, which can be used to automate the building of PLeTs v4 products.
+
+%----------------------------------------------------------
+
+\section{Parameters}
+\label{sc:params}
+
+One way to get around the problem of Java not having a preprocessor is by abusing the optimization features that Java compilers do generally have. In the standard Java compilers, any code that is unreachable is automatically removed by the compiler's optimizer, which means that we are able to remove certain parts of code by making sure they can never be executed. Essentially, we create conditions of the form \lstinline{if(true)} and \lstinline{if(false)} to encapsulate our \gls{variant} code.
+
+To do this, one can use what is called a \lstinline{Static Final} attribute. When a conditional loop evaluates itself with a single boolean attribute, and that attribute is always false, that loop will be removed by the optimizer due to being unreachable. Usually the compiler cannot know if the condition will always be false or not, given that this would require a complex analysis of a state machine, but since a \lstinline{Static Final} attribute can never change its value, the optimizer will be able to tell. Listings \ref{lst:preprocessor} and \ref{lst:staticfinal} show an example of how this can be used.
+
+\begin{listing}
+\begin{minted}[frame=single,
+               framesep=3mm,
+               linenos=true,
+               xleftmargin=21pt,
+               breaklines=true,
+               tabsize=4]{java}
+public class Preprocessor
+{
+ public static final boolean FULLACCESS = false;
+ ...
+}
+\end{minted}
+\caption{Preprocessor.java, encapsulating variability points} \label{lst:preprocessor}
+\end{listing}
+
+\begin{listing}
+\begin{minted}[frame=single,
+               framesep=3mm,
+               linenos=true,
+               xleftmargin=21pt,
+               breaklines=true,
+               tabsize=4]{java}
+import Preprocessor;
+
+public class UmlAssociation extends UmlElement implements Serializable
+{
+...
+  private UmlElement end1Element;
+...
+  public UmlElement getEnd1()
+  {
+    if(Preprocessor.FULLACCESS)
+    {
+      return this.end1Element;
+    }
+    else
+    {
+      return DeepCopy.copy(this.end1Element);
+    }
+  }
+...
+}
+\end{minted}
+\caption{Variability point being resolved by the Preprocessor.java attributes, taken from \cite{AUTOREST}} \label{lst:staticfinal}
+\end{listing}
+
+In the example, a Preprocessor class is declared in Listing \ref{lst:preprocessor} which contains all of the variability point constants for free access from the rest of the project's packages; essentially, we are centralizing the variability management in a single artifact. The packages may then use these attributes in conventional conditional loops to transform them into conditional compilation loops. In Listing \ref{lst:staticfinal}, the method getEnd1 is conditionally compiled so that if the selected product has full access (a \gls{variability} point of the AutoREST application \cite{AUTOREST} that represents security access level), a reference to end1Element is returned. Meanwhile, if the selected product does not have full access, only a copy is returned, ensuring that the object cannot be modified from outside. This ensures that if the product does not have full access, the user will not be able to directly alter the end1Element variable, being forced to use other methods to do so.
+
+This approach has one very important limitation: it can only be used where normal conditional loops may be used. Therefore, it is impossible to conditionally compile an entire method or class, as Java does not permit conditional loop statements to be outside method bodies (remember \gls{grammar}s: the rule for \emph{if} statements would be inside the rule for \emph{methods}, meaning that the syntactic analyser would only accept the token ``IF'' when it is found inside a method). While it works in the example above, it does work in the example presented in Listing \ref{lst:staticfinalerror}.
+
+\begin{listing}
+\begin{minted}[frame=single,
+               framesep=3mm,
+               linenos=true,
+               xleftmargin=21pt,
+               breaklines=true,
+               tabsize=4]{java}
+import Preprocessor;
+
+public class UmlAssociation extends UmlElement implements Serializable
+{
+...
+  //INCORRECT JAVA SYNTAX, DOES NOT COMPILE!!!!!
+  if(FULLACCESS)
+  {
+    public UmlAssociation()
+    {
+      BuildIt(null, null, null, null, null, null, null, null, null);
+    }
+  }
+...
+}
+\end{minted}
+\caption{Limitations of Static Final attributes, taken from \cite{AUTOREST}} \label{lst:staticfinalerror}
+\end{listing}
+
+In this example, an entire constructor should be conditionally compiled so that this particular overload is only available if the configured product has full access. While it is possible to place the method's inner code inside a conditional loop, that would mean this overload would still exist, and a programmer using an IDE like NetBeans or Eclipse would be fooled into thinking it is available, when in fact it is not. The ideal way of solving this problem would be to remove the method entirely from the compiled .jar file, so that the programmer is not tricked into thinking the method exists.
+
+The \lstinline{Static Final} form of \gls{variability} management is perfectly valid for situations where a single method may have two different implementations depending on product configuration. It is a simpler way of controlling \gls{variability} than the other approaches discussed ahead, but it must be used with caution. An especially dangerous effect of using \lstinline{Static Final} attributes for \gls{variability} management is that the documentation (Javadoc) cannot be conditionally compiled using this approach, making it virtually impossible to document a variable method properly.
+
+In order to get around \gls{variability} situations like the one in Listing \ref{lst:staticfinalerror}, where a method's availability is dependent on product configuration, it is possible to use one of two other approaches: Java interfaces and Java code reflection,.
+
+%----------------------------------------------------------
+
+\section{Component Interfaces as Variant-Selection Mechanisms}
+\label{sc:interfaces}
+
+One viable solution for the problem of selectively enabling methods raised at the end of Section \ref{sc:sfa} is to encapsulate the public interface of a class through use of explicit interfaces. Through the Separated Interface pattern \cite{FOWLER:2002}, we are able to make packages with the express purpose of encapsulating \gls{variant}s, choosing which parts of a class (usually a facade) will be available to the rest of the system.
+
+The basic notion of the Separated Interface pattern is for the system to only access a package's interface, with the implementation being plugged in through a factory.
+
+\begin{listing}
+\begin{minted}[frame=single,
+               framesep=3mm,
+               linenos=true,
+               xleftmargin=21pt,
+               breaklines=true,
+               tabsize=4]{java}
+package ParserPackageA;
+
+public interface ParserA
+{
+  Object method1();
+}
+\end{minted}
+\caption{Interface making only method1 available.} \label{lst:interface1}
+\end{listing}
+
+\begin{listing}
+\begin{minted}[frame=single,
+               framesep=3mm,
+               linenos=true,
+               xleftmargin=21pt,
+               breaklines=true,
+               tabsize=4]{java}
+package ParserPackageB;
+
+public interface ParserB
+{
+  Object method2();
+}
+\end{minted}
+\caption{Interface making only method2 available.} \label{lst:interface2}
+\end{listing}
+
+\begin{listing}
+\begin{minted}[frame=single,
+               framesep=3mm,
+               linenos=true,
+               xleftmargin=21pt,
+               breaklines=true,
+               tabsize=4]{java}
+package ConcreteParserPackage;
+
+import ParserPackageA.ParserA;
+import ParserPackageB.ParserB;
+
+public class ConcreteParser extends ParserA, ParserB
+{
+  Object method1()
+  {
+    ...
+  }
+
+  Object method2()
+  {
+    ...
+  }
+}
+\end{minted}
+\caption{Concrete Parser implementation.} \label{lst:interfaceconcrete}
+\end{listing}
+
+\begin{listing}
+\begin{minted}[frame=single,
+               framesep=3mm,
+               linenos=true,
+               xleftmargin=21pt,
+               breaklines=true,
+               tabsize=4]{java}
+package ParserFactoryPackage;
+
+import ConcreteParserPackage.ConcreteParser;
+import ParserPackageA.ParserA;
+import ParserPackageB.ParserB;
+
+public class ParserFactory
+{
+  public Parser getInstance()
+  {
+    return new ConcreteParser();
+  }
+}
+\end{minted}
+\caption{Factory to plug ConcreteParser into the available interface.} \label{lst:interfacefactory}
+\end{listing}
+
+%----------------------------------------------------------
+
+\section{Factory Method with Reflection}
+\label{sc:reflection}
+
+While compilation directives are not readily available in Java, it is possible to create a mechanism equal to (and perhaps simpler than) the Variant Factory proposed in \cite{LASER:2015} by using code reflection. Code reflection\footnote{Written with sizeable contributions from Anderson Domingues} is a type of mechanism known as \emph{introspection} where software artifacts are able to analyse and modify themselves during runtime, enabling them to alter their own behaviour based on the software's current conditions. Reflection is one of the oldest programming concepts, dating back to the notion of \emph{self-modifying code} which was present in the earliest assembly language codes. Back then, the idea was basically to keep code inside the data portions of a software and then pull them into the processing portions, essentially changing the execution of the program. Of course, this caused several maintainability problems back then, and occasioned numerous bugs resulting from unexpected runtime modifications. Eventually, the practice was dropped entirely and labeled as bad practice.
+
+The modern notion of reflection is slightly different from self-modifying code. Control mechanisms are set in place in modern programming languages that implement introspection, and the degree to which a program may be modified during runtime is greatly reduced to avoid unexpected behaviour or ``write-only'' code. Among these mechanisms is the restriction that is placed on reflection to be used only to alter runtime behaviour, rather than making permanent modifications to executables and libraries. Essentially, this means reflection cannot alter code or executables. One classic example of reflection is the implementation of generics (such as in List\textless E \textgreater), where the language identifies the object inside a generic reference by effectivelly asking it for its type.
+
+ The process of creating a Variant Factory in Java using reflection is similar to that used in C\#: an interface is created to represent a \gls{vpoint}, declaring its public signature, and a Factory class is used to instantiate \gls{variant}s based on that interface. In this implementation, however, we simplify the code related to choosing a \gls{variant} by using reflection to analyse the available \gls{variant}s for a suitable one. This both removes the need to alter the Factory code when a \gls{variant} is created and makes it possible for the system to use a single Factory to realize all \gls{variant}s.
+
+First, the interface for a particular \gls{vpoint} is implemented in its own isolated deployment package, so as to make any dependencies to it restricted and well-controlled. This interface must specify all of the necessary public methods of any \gls{variant} that implements this \gls{vpoint}, and may be declared with default behavior when appropriate (see Listing \ref{lst:vpointinterface}).
+
+\begin{listing}
+\begin{minted}[frame=single,
+               framesep=3mm,
+               linenos=true,
+               xleftmargin=21pt,
+               breaklines=true,
+               tabsize=4]{java}
+package ParserVariationPoint;
+
+public interface IParser
+{
+  default Object parse(Object input)
+  {
+    return null;
+  }
+}
+\end{minted}
+\caption{Example of \gls{vpoint} interface with default behavior} \label{lst:vpointinterface}
+\end{listing}
+
+Next, the \gls{variant}s must be created, also in their own deployment packages, with a facade that implements the \gls{vpoint} interface. Listing \ref{lst:variantfacade} shows an example of this.
+
+\begin{listing}
+\begin{minted}[frame=single,
+               framesep=3mm,
+               linenos=true,
+               xleftmargin=21pt,
+               breaklines=true,
+               tabsize=4]{java}
+package ParserX;
+
+import ParserVariationPoint.IParser;
+
+public class ParserX implements IParser
+{
+  public Object parse(Object input)
+  {
+    //execute
+  }
+}
+\end{minted}
+\caption{Example of \gls{variant} facade} \label{lst:variantfacade}
+\end{listing}
+
+At this point, all of the necessary components are in place for us to build a Variant Factory. Listing \ref{lst:variantfactory} presents an example of a Variant Factory implementation. In particular, this implementation uses the notion of \emph{constraints} to select which available \gls{variant} best satisfies the request. This and other improvements on the Variant Factory pattern will be reviewed in Chapter \ref{ch:patterns}. For now, focus on the use of reflection and assume that the statement \lstinline{i.satisfies(v)} always evaluates to \lstinline{true}.
+
+\begin{listing}
+\begin{minted}[frame=single,
+               framesep=3mm,
+               linenos=true,
+               xleftmargin=21pt,
+               breaklines=true,
+               tabsize=4]{java}
+package ParserFactory;
+
+import ParserVariationPoint.IParser;
+
+public class ParserFactory
+{
+  public static Object getInstanceOf(Configuration f, Constraints i) throws Exception
+  {
+    List<Feature> l = f.getFeature("Parser"));
+    for(Feature v : l)
+    {
+      if(i.satisfies(v))
+      {
+        Class<?> clazz = Class.forName(v.getPath());
+        Constructor<?> ctor = clazz.getConstructor();
+        return ctor.newInstance();
+      }
+    }
+    throw new Exception("Feature not available for: \textless" + c.getName() + "\textgreater");
+  }
+}
+\end{minted}
+\caption{Example of Variant Factory} \label{lst:variantfactory}
+\end{listing}
+
+First, the code in Listing \ref{lst:variantfactory} acquires a list of all the \gls{variant}s of the \gls{vpoint} ``Parser''. Then, iterating over that list, it evaluates each \gls{variant} against the constraints imposed by the requesting module, and if a feature satisfies those constraints, an instance of that \gls{variant} is returned.
+
+By using reflection in this manner, we have solved the problem of selecting a \gls{variant} represented by an entire class, which was not possible by using a Static Final attribute. We are now able to implement the exact same capacities of the Variant Factory pattern described in \cite{LASER:2015}, and therefore have a way of selecting \gls{variant}s dynamically.
+
+%----------------------------------------------------------
+
+\section{Java Preprocessor}
+\label{sc:prepros}
+
+%TODO: use UmlElement's "public" as example of use.
+%TODO: use UmlAssociation's constructors as example of use.
+
+%----------------------------------------------------------
+
+\section{Ant Build System}
+\label{sc:ant}
+
+%----------------------------------------------------------

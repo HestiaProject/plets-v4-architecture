@@ -5,6 +5,7 @@
 \usepackage{minted}
 \usepackage{syntax}
 \usepackage[acronym]{glossaries}
+\usepackage[toc,page]{appendix}
 
 \title{PLeTs v4 Architectural Manual}
 \author{Marcelo Schmitt Laser}
@@ -84,10 +85,14 @@
 
 \tableofcontents
 
-\include{tex/staticfinal}
+\include{tex/mechanisms}
 \include{tex/patterns}
 \include{tex/modules}
 \include{tex/architecture}
+
+\begin{appendices}
+\include{tex/compilers}
+\end{appendices}
 
 \bibliographystyle{abbrv}
 \bibliography{basic.bib}
