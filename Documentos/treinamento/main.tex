@@ -1,0 +1,104 @@
+\documentclass{report}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{minted}
+\usepackage{syntax}
+\usepackage[acronym]{glossaries}
+\usepackage[toc,page]{appendix}
+
+\title{Training Basic Material}
+\author{Marcelo Schmitt Laser}
+\date{April 2017}
+
+%-----------------------------------------------
+
+\makeglossaries
+
+\newacronym{bnf}{BNF}{Backus-Naur Form}
+\newacronym{corba}{CORBA}{Common Object Request Broker Architecture}
+\newacronym{cbse}{CBSE}{Component-Based Software Engineering}
+\newacronym{spl}{SPL}{Software Product Line}
+\newacronym{sple}{SPLE}{Software Product Line Engineering}
+\newacronym{sei}{SEI}{Software Engineering Institute}
+\newglossaryentry{bindtime}
+{
+	name={binding time},
+	description={The moment during which the properties of a software artifact are configured. Typically, these may be: compile-time, where the configuration is handled during the compilation process; link-time, where the configuration is handled at the moment of dependency solution and access to external libraries; load-time, where the configuration is handled the moment the software product is instanced (loaded), and; run-time, where the configuration is handled during the software's execution}
+}
+\newglossaryentry{grammar}
+{
+	name={grammar},
+	description={The set of rules that define the structure of all possible strings within a language. For any one string (regardless of size) to belong to a particular language, it must match that language's grammar. Unless stated otherwise, this document uses the terms \emph{grammar} and \emph{context-free grammar} interchangeably. More information on context-free grammars and grammars in general can be found in \cite{HOPCROFT:2000}}
+}
+\newglossaryentry{regex}
+{
+	name={regular expression},
+	description={A sequence of characters that represents a string pattern. A regular expression has several uses, among which the ones we are most interested in are searching a stream of text for matching strings and validating a string against a pre-determined pattern. More information on regular expressions can be found in \cite{HOPCROFT:2000}}
+}
+\newglossaryentry{variability}
+{
+	name={variability},
+	description={From SEI \cite{BACHMANN:2005}: ``Variability is the ability of a system, an asset, or a development environment to support the production of a set of artifacts that differ from each other in a preplanned fashion.''}
+}
+\newglossaryentry{variant}
+{
+	name={variant},
+	description={From SEI \cite{BACHMANN:2005}: ``The realization of a variable part, meaning the result of exercising the variation mechanism(s), is called a variant.''}
+}
+\newglossaryentry{connector}
+{
+	name={connector},
+	description={From Taylor et al. \cite{TAYLOR:2009}: ``An architectural element tasked with effecting and regulating interactions among components.''}
+}
+\newglossaryentry{vpoint}
+{
+	name={variation point},
+	description={Also known as variable part, it is a well-defined point in the SPL where modifications may be introduced \cite{BACHMANN:2005}.}
+}
+
+%-----------------------------------------------
+
+\begin{document}
+
+%\maketitle
+
+\begin{titlepage}
+	\centering
+	\par\vspace{3cm}
+	{\scshape\LARGE Universidade Federal do Pampa \par}
+	\vspace{4cm}
+	{\huge\bfseries Training Basic Material\par}
+	\vspace{2cm}
+	{\Large\itshape Marcelo Schmitt Laser\par}
+
+	\vfill
+
+% Bottom of the page
+	{\large \today\par}
+\end{titlepage}
+
+\include{tex/introduction}
+
+\printglossary[type=\acronymtype]
+\printglossary
+
+\tableofcontents
+
+\include{tex/paradigmas}
+\include{tex/logic}
+\include{tex/uml}
+\include{tex/datastructures}
+\include{tex/algorithms}
+\include{tex/patterns}
+\include{tex/compilers}
+\include{tex/test}
+
+\begin{appendices}
+
+\end{appendices}
+
+\bibliographystyle{abbrv}
+\bibliography{basic.bib}
+
+\end{document}
